@@ -21,6 +21,11 @@ describe('Framebuffer', function(){
 		fb.setXY(32, 16);
 		expect(fb.x).to.be.equal(32);
 		expect(fb.y).to.be.equal(16);
+
+		fb.setXY();
+		expect(fb.x).to.be.equal(32);
+		expect(fb.y).to.be.equal(16);
+
 	});
 
 	it('#updatePointer', function(){
@@ -58,6 +63,19 @@ describe('Framebuffer', function(){
 
 		expect(value).is.equal(1);
 	});
+
+	/* Empaqueta el framebuffer en un objeto buffer. Usado para el envio
+	por la red */
+	it('#transfer', function(){
+		fb = new Framebuffer(64, 16);
+		var bitmap = [0x3C, 0x7E, 0x66, 0x66, 0x66, 0x66, 0x7E, 0x3C];
+		fb.pushBitmap(bitmap);
+		var transfer = fb.transfer();
+		// console.log(transfer.toJSON());
+		expect(transfer).to.be.instanceof(Buffer);
+		expect(transfer.length).to.be.equal(64/8*16);
+	});
+
 	describe("with a few examples of #pushBitmap's", function(){
 
 		it("8x8 at right-upper corner over 8x16 fb", function(){
@@ -100,6 +118,29 @@ describe('Framebuffer', function(){
 			];
 			fb.pushBitmap(bitmap);
 
+			expect(fb.buffer).to.be.deep.equal(expected);
+
+		});
+
+		it("two 8x8 bitmaps over 16x16 fb", function(){
+			fb = new Framebuffer(16, 16);
+			//zero
+			var bitmap = [0x3C, 0x7E, 0x66, 0x66, 0x66, 0x66, 0x7E, 0x3C];
+			var expected = [
+			0,0,1,1, 1,1,0,0, 0,0,1,1, 1,1,0,0,
+			0,1,1,1, 1,1,1,0, 0,1,1,1, 1,1,1,0,
+			0,1,1,0, 0,1,1,0, 0,1,1,0, 0,1,1,0,
+			0,1,1,0, 0,1,1,0, 0,1,1,0, 0,1,1,0,
+			0,1,1,0, 0,1,1,0, 0,1,1,0, 0,1,1,0,
+			0,1,1,0, 0,1,1,0, 0,1,1,0, 0,1,1,0,
+			0,1,1,1, 1,1,1,0, 0,1,1,1, 1,1,1,0,
+			0,0,1,1, 1,1,0,0, 0,0,1,1, 1,1,0,0,
+			0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+			0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0];
+
+			fb.pushBitmap(bitmap);
+			fb.pushBitmap(bitmap);
+			// console.log(fb.buffer);
 			expect(fb.buffer).to.be.deep.equal(expected);
 
 		});
