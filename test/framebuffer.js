@@ -1,7 +1,10 @@
 var expect = require('chai').expect,
 Framebuffer = require('../lib/framebuffer'),
+bitmap = require('../lib/std_8x8'),
 fb
 ;
+var zero = [0x3C, 0x7E, 0x66, 0x66, 0x66, 0x66, 0x7E, 0x3C];
+var eme = [0x00, 0x00, 0x7E, 0xFF, 0xDB, 0xDB, 0xDB, 0xDB];
 
 describe('Framebuffer', function(){
 	it('an instance of 64 width x 32 height bits', function(){
@@ -68,22 +71,46 @@ describe('Framebuffer', function(){
 	por la red */
 	it('#transfer', function(){
 		fb = new Framebuffer(64, 16);
-		var bitmap = [0x3C, 0x7E, 0x66, 0x66, 0x66, 0x66, 0x7E, 0x3C];
-		fb.pushBitmap(bitmap);
+		
+		fb.pushBitmap(zero);
 		var transfer = fb.transfer();
-		// console.log(transfer.toJSON());
+		fb.draw();
 		expect(transfer).to.be.instanceof(Buffer);
 		expect(transfer.length).to.be.equal(64/8*16);
 	});
 
+	it("#copy", function(){
+		fb = new Framebuffer(16, 16);
+		var fb1 = new Framebuffer(16, 16);
+
+		var expected = [
+			0,0,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0,
+			0,1,1,1, 1,1,1,0, 0,0,0,0, 0,0,0,0,
+			0,1,1,0, 0,1,1,0, 0,0,0,0, 0,0,0,0,
+			0,1,1,0, 0,1,1,0, 0,0,0,0, 0,0,0,0,
+			0,1,1,0, 0,1,1,0, 0,0,0,0, 0,0,0,0,
+			0,1,1,0, 0,1,1,0, 0,0,0,0, 0,0,0,0,
+			0,1,1,1, 1,1,1,0, 0,0,0,0, 0,0,0,0,
+			0,0,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0,
+			0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+			0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0
+		];
+
+		fb1.pushBitmap(zero);
+
+		fb.copy(fb1);
+		fb1.draw();
+
+		expect(fb.buffer).to.be.deep.equal(expected);
+	});
+
 	describe("with a few examples of #pushBitmap's", function(){
 
-		it("8x8 at right-upper corner over 8x16 fb", function(){
+		it("8x8 at right-bottom corner over 8x16 fb", function(){
 			//constraint at 16 cols per row
 			fb = new Framebuffer(8, 16);
-			//zero
-			var bitmap = [0x3C, 0x7E, 0x66, 0x66, 0x66, 0x66, 0x7E, 0x3C];
 			var expected = [
+			0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
 			0,0,1,1, 1,1,0,0,
 			0,1,1,1, 1,1,1,0,
 			0,1,1,0, 0,1,1,0,
@@ -91,19 +118,37 @@ describe('Framebuffer', function(){
 			0,1,1,0, 0,1,1,0,
 			0,1,1,0, 0,1,1,0,
 			0,1,1,1, 1,1,1,0,
-			0,0,1,1, 1,1,0,0,
-			0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0];
-			fb.pushBitmap(bitmap);
-			// console.log(fb.buffer);
+			0,0,1,1, 1,1,0,0
+			];
+			var expected = [
+			0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+			0,0,0,0, 0,0,0,0,
+			0,0,0,0, 0,0,0,0,
+			0,1,1,1, 1,1,1,0,
+			1,1,1,1, 1,1,1,1,
+			1,1,0,1, 1,0,1,1,
+			1,1,0,1, 1,0,1,1,
+			1,1,0,1, 1,0,1,1,
+			1,1,0,1, 1,0,1,1
+			];
+			fb.setXY(null, 8);
+			fb.pushBitmap(bitmap[String('m').charCodeAt()]);
+			fb.draw();
 			expect(fb.buffer).to.be.deep.equal(expected);
 
+		});
+
+		it("#compact", function(){
+			fb = new Framebuffer(8, 8);
+			fb.pushBitmap(bitmap[String('m').charCodeAt()]);	
+			var c = fb.compact();
+
+			expect(c).to.be.deep.equal(eme);		
 		});
 
 		it("8x8 at right-bottom corner over 16x16 fb", function(){
 			fb = new Framebuffer(16, 16);
 			fb.setXY(8, 8);
-			//zero
-			var bitmap = [0x3C, 0x7E, 0x66, 0x66, 0x66, 0x66, 0x7E, 0x3C];
 			var expected = [
 			0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
 			0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
@@ -116,7 +161,8 @@ describe('Framebuffer', function(){
 			0,0,0,0, 0,0,0,0,  0,1,1,1, 1,1,1,0,
 			0,0,0,0, 0,0,0,0,  0,0,1,1, 1,1,0,0
 			];
-			fb.pushBitmap(bitmap);
+			fb.pushBitmap(zero);
+			fb.draw();
 
 			expect(fb.buffer).to.be.deep.equal(expected);
 
@@ -124,8 +170,6 @@ describe('Framebuffer', function(){
 
 		it("two 8x8 bitmaps over 16x16 fb", function(){
 			fb = new Framebuffer(16, 16);
-			//zero
-			var bitmap = [0x3C, 0x7E, 0x66, 0x66, 0x66, 0x66, 0x7E, 0x3C];
 			var expected = [
 			0,0,1,1, 1,1,0,0, 0,0,1,1, 1,1,0,0,
 			0,1,1,1, 1,1,1,0, 0,1,1,1, 1,1,1,0,
@@ -138,9 +182,9 @@ describe('Framebuffer', function(){
 			0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
 			0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0];
 
-			fb.pushBitmap(bitmap);
-			fb.pushBitmap(bitmap);
-			// console.log(fb.buffer);
+			fb.pushBitmap(zero);
+			fb.pushBitmap(zero);
+			fb.draw();
 			expect(fb.buffer).to.be.deep.equal(expected);
 
 		});
