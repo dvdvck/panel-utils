@@ -1,0 +1,30 @@
+{
+  "name": "panel-util",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Utilities shared between client and server sides",
+  "main": "lib/framebuffer.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "chai": "~1.9.1",
+    "mocha": "~1.18.2"
+  },
+  "scripts": {
+    "test": "mocha -R spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://repo:panel-utils.git"
+  },
+  "keywords": [
+    "utils",
+    "panel-led",
+    "framebuffer"
+  ],
+  "author": "David Retana <dvdvck@gmail.com>",
+  "license": "ISC"
+}
