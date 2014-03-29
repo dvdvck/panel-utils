@@ -79,6 +79,14 @@ describe('Framebuffer', function(){
 		expect(transfer.length).to.be.equal(64/8*16);
 	});
 
+	it("#Framebuffer.transfer", function(){
+		var buffer = new Buffer(bitmap['49']);
+		var fb = Framebuffer.transfer(buffer, 8);
+
+		expect(fb.transfer()).to.be.deep.equal(buffer);
+		fb.draw();
+	});
+
 	it("#copy", function(){
 		fb = new Framebuffer(16, 16);
 		var fb1 = new Framebuffer(16, 16);
